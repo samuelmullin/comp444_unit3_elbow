@@ -1,7 +1,7 @@
 defmodule Comp444Unit3Elbow.Elbow do
   use GenServer
 
-  @elbow_pwm_pin 12
+  @elbow_pwm_pin 13
 
   # -- Public API
   def start_link(state) do

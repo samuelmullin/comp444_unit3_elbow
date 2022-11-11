@@ -6,7 +6,7 @@ Programming/Circuit Task: Since we don't have all the hardware to build a roboti
 
 ## Process
 
-Since an elbow has a limited range of motion, the obvious choice to simulate it is the microservo.  Controlling it is relatively simple as we have done something similar using a potentiometer in the exercises for Circuit 3.
+Since an elbow has a limited range of motion, the obvious choice within the inventors kit to simulate it is the microservo. A pneumatic joint would be a bit more realistic, but we have to work with what we have! Controlling it is relatively simple as we have done something similar using a potentiometer in the exercises for Circuit 3. 
 
 We control a servo using PWM, and since I am using a Raspberry pi, I will hook up the microservo to one of the hardware PWM pins on the Raspberry Pi.  Since we want an approximate range of 0 to 170 degrees (as described in the prompt), we need to do a bit of math. Our servo can use pulse widths between approximately 800 and 2200, so when we accept a value for degrees, we'll do a calculation like this:
 
@@ -22,9 +22,57 @@ For PWM control, we need to add one dependency, which is the [Pigpiox library](h
 
 To build our circuit we need the following:
 - A raspberry pi (I use a zero w)
-- Three male to male jumper cables
-- Two male to female jumper cables
+- Three male to male jumper cables (to connect the servo to the breadboard)
+- Two male to female jumper cables (to connect the raspberry pi to the breadboard)
 - A microservo
 - Some method of powering the servo (I used the battery pack that came with the inventors kit)
 
-[add photo]
+
+## Code
+
+```elixir
+defmodule Comp444Unit3Elbow.Elbow do
+  use GenServer
+
+  @elbow_pwm_pin 13
+  @servo_minimum 800
+  @servo_maximum 2200
+  @degrees_maximum 170
+
+  # -- Public API
+  def start_link(state) do
+    GenServer.start_link(__MODULE__, state, name: __MODULE__)
+  end
+
+  def bend_elbow(angle) when is_integer(angle) and angle >=0 and angle <= 170 do
+    GenServer.cast(__MODULE__, {:set_position, angle})
+    {:ok, angle}
+  end
+  def bend_elbow(_), do: {:error, "Angle must be an integer between 0 and 170"}
+
+```
+
+Defines our public API, which allows us to bend the elbow (move the servo) between 0 and 170 degrees using `bend_elbow/1`
+
+```elixir
+  # -- Callbacks
+  @impl true
+  def init(_config) do
+    Pigpiox.GPIO.set_servo_pulsewidth(@elbow_pwm_pin, 800)
+    {:ok, %{}}
+  end
+```
+
+Initialize our servo to the minimum angle on startup
+
+```elixir
+  @impl true
+  def handle_cast({:set_position, position}, state) do
+    output = floor((@servo_maximum - @servo_minimum) / @degrees_maximum * position) + 800
+    Pigpiox.GPIO.set_servo_pulsewidth(@elbow_pwm_pin, output)
+    {:noreply, state}
+  end
+end
+```
+
+Allow the setting of the servo to a particular angle, based on the formula we defined above.
