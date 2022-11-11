@@ -1,5 +1,7 @@
 # Comp444Unit3Elbow
 
+![Elbow](./elbow.gif)
+
 ## Prompt
 
 Programming/Circuit Task: Since we don't have all the hardware to build a robotic arm, imagine you have been given the task of creating the elbow joint. Select the appropriate motor for this task, and then create a program and circuit using your Arduino which can demonstrate your motor performing the correct elbow movement. It may help if you tape an object such as a popcicle stick,drinking straw, or long skinny piece of paper to your motor to demonstrate the movement of the lower portion of the arm under control of your program. Your program should take as input a number of degrees to move the elbow from an arbitrary starting position. For example, if you choose 'fully straight' as the starting position, this will be designated 0 degrees (start). The arm could then bend about 170 degrees, indicating 'fully bent' (check the amount of bend on your own elbow from hand straight out to hand near your shoulder for reference).
